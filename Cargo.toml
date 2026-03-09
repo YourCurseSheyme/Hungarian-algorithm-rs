@@ -2,6 +2,15 @@
 name = "assignment_solver"
 version = "0.1.0"
 edition = "2024"
+authors = ["Sheyme <yourcursesheyme@gmail.com>"]
+description = "A casual Hungarian algorithm solver with LAPJV heuristics."
+repository = "https://github.com/YourCurseSheyme/Hungarian-algorithm-rs"
+license = "MIT"
+keywords = ["hungaria", "assignment", "bitpartite", "matching", "optimization"]
+categories = ["algorithms", "mathematics"]
 
 [dependencies]
+# No external dependencies for the core
+
+[dev-dependencies]
 proptest = "1.10.0"

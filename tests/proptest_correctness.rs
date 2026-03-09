@@ -1,5 +1,5 @@
-use proptest::prelude::*;
 use assignment_solver::{CostMatrix, Objective, solve_assignment};
+use proptest::prelude::*;
 use std::collections::HashSet;
 
 prop_compose! {

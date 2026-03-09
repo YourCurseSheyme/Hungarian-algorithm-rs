@@ -1,33 +1,22 @@
 use std::ops::{Add, Sub};
 
-/// Trait defining the mathematical operations required for the Hungarian algorithm
+/// Mathematical operations required for the Hungarian algorithm.
 ///
-/// # Float types and NaN
-/// Floating-point types(`f32`, `f64`) are intentionally excluded from the default
-/// implementations because they do not implement `Ord` trait. The `NaN` (Not a Number)
-/// value breaks  the total ordering requirement, which is critical for the algorithm's
-/// minimum-finding logic. If you need to use floats, consider using a wrapper like
-/// `OrderedFloat` from the `ordered-float` crate and implementing this trait for it.
+/// # Type Constraints
+/// Requires Ord to guarantee total ordering. Floating-point types (f32, f64)
+/// are intentionally excluded due to NaN values breaking the minimum-search logic.
+/// Use a wrapper like OrderedFloat if fractional costs are strictly required.
 ///
-/// # Overflow behavior
-/// The Hungarian algorithm primarily performs subtractions (reducing rows/columns) and
-/// bounded additions (updating potentials). Mathematically, the internal values never
-/// exceed the maximum absolute value present in the initial cost matrix. Therefore,
-/// explicit overflow handling (like `checked_add`) is omitted  in the hot path for
-/// performance reasons. Note that calculating the `total_cost` at the end *can* overflow
-/// if the sum of the assigned weights exceeds the type's capacity.
-///
-/// # Infinity and `max_value`
-/// The `max_value()` is used strictly as an "infinity" sentinel for initializing
-/// minimum-search variables (e.g., the `slack` array). It must be handled carefully:
-/// the algorithm guarantees it will never add to `max_value()`, which would cause an
-/// overflow panic. It is only used for comparisons and replacements.
+/// # Overflow Behavior
+/// The algorithm primarily performs bounded subtractions and additions. Internal
+/// values never exceed the maximum absolute value present in the initial matrix.
+/// Explicit overflow handling is omitted in the hot path for maximum performance.
 pub trait Cost: Copy + Ord + Add<Output = Self> + Sub<Output = Self> {
-    /// Returns the zero value (additive identity) for the type.
+    /// Returns the additive identity (zero) for the type.
     fn zero() -> Self;
 
     /// Returns the maximum possible value for the type.
-    /// Used as an "infinity" sentinel during minimum searches.
+    /// Used strictly as an "infinity" sentinel during minimum searches.
     fn max_value() -> Self;
 }
 
@@ -47,7 +36,9 @@ macro_rules! impl_cost_for_int {
     };
 }
 
-impl_cost_for_int!(i32, i64, i128, isize, u32, u64, u128, usize);
+// Restricts implementation to signed integers.
+// Dual variables (potentials) in the classic algorithm can become negative.
+impl_cost_for_int!(i32, i64, i128, isize);
 
 #[cfg(test)]
 mod tests {
@@ -63,9 +54,6 @@ mod tests {
     fn test_cost_implementation() {
         assert_eq!(<i32 as Cost>::zero(), 0);
         assert_eq!(<i32 as Cost>::max_value(), i32::MAX);
-
-        assert_eq!(<u64 as Cost>::zero(), 0);
-        assert_eq!(<u64 as Cost>::max_value(), u64::MAX);
     }
 
     #[test]
@@ -73,8 +61,5 @@ mod tests {
         check_generic_cost::<i32>();
         check_generic_cost::<i64>();
         check_generic_cost::<isize>();
-        check_generic_cost::<u32>();
-        check_generic_cost::<u64>();
-        check_generic_cost::<usize>();
     }
 }

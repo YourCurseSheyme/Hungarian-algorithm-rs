@@ -1,6 +1,10 @@
 use crate::error::AssignmentError;
 use std::ops::{Index, IndexMut};
 
+/// 2D cost matrix backed by a flat array.
+///
+/// Designed for cache locality and zero-overhead indexing. Enforces dimension
+/// constraints and prevents capacity overflows at creation.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CostMatrix<T> {
     rows: usize,
@@ -9,12 +13,19 @@ pub struct CostMatrix<T> {
 }
 
 impl<T> CostMatrix<T> {
+    /// Constructs a new matrix from a flat data vector.
+    ///
+    /// # Errors
+    /// Returns AssignmentError if dimensions are zero, if the data length
+    /// does not match rows * cols, or if the capacity overflows usize.
     pub fn new(rows: usize, cols: usize, data: Vec<T>) -> Result<Self, AssignmentError> {
         if rows == 0 || cols == 0 {
             return Err(AssignmentError::EmptyMatrix);
         }
 
-        let expected_len = rows.checked_mul(cols).ok_or(AssignmentError::MatrixTooLarge)?;
+        let expected_len = rows
+            .checked_mul(cols)
+            .ok_or(AssignmentError::MatrixTooLarge)?;
 
         if data.len() != expected_len {
             return Err(AssignmentError::InvalidDataLength {
@@ -26,6 +37,7 @@ impl<T> CostMatrix<T> {
         Ok(Self { rows, cols, data })
     }
 
+    /// Constructs a new matrix by evaluating a closure for each `(row, col)` index.
     pub fn from_fn<F>(rows: usize, cols: usize, mut f: F) -> Result<Self, AssignmentError>
     where
         F: FnMut(usize, usize) -> T,
@@ -34,7 +46,9 @@ impl<T> CostMatrix<T> {
             return Err(AssignmentError::EmptyMatrix);
         }
 
-        let capacity = rows.checked_mul(cols).ok_or(AssignmentError::MatrixTooLarge)?;
+        let capacity = rows
+            .checked_mul(cols)
+            .ok_or(AssignmentError::MatrixTooLarge)?;
         let mut data = Vec::with_capacity(capacity);
 
         for r in 0..rows {
@@ -46,41 +60,43 @@ impl<T> CostMatrix<T> {
         Ok(Self { rows, cols, data })
     }
 
+    /// Returns the number of rows.
     #[inline]
     pub fn rows(&self) -> usize {
         self.rows
     }
 
+    /// Returns the number of columns.
     #[inline]
     pub fn cols(&self) -> usize {
         self.cols
     }
 
+    /// Returns the dimensions as a `(rows, cols)` tuple.
     #[inline]
     pub fn shape(&self) -> (usize, usize) {
         (self.rows, self.cols)
     }
 
+    /// Returns the total number of elements.
     #[inline]
     pub fn len(&self) -> usize {
         self.data.len()
     }
 
+    /// Returns `true` if the matrix contains no elements.
     #[inline]
     pub fn is_empty(&self) -> bool {
         self.data.is_empty()
     }
 
+    /// Returns a reference to the underlying flat data array.
     #[inline]
     pub fn data(&self) -> &[T] {
         &self.data
     }
 
-    #[inline]
-    pub fn data_mut(&mut self) -> &mut [T] {
-        &mut self.data
-    }
-
+    /// Consumes the matrix, returning the underlying flat data array.
     #[inline]
     pub fn into_inner(self) -> Vec<T> {
         self.data
@@ -91,6 +107,7 @@ impl<T> CostMatrix<T> {
         row * self.cols + col
     }
 
+    /// Safely retrieves a reference to the element at `(row, col)`.
     #[inline]
     pub fn get(&self, row: usize, col: usize) -> Option<&T> {
         if row < self.rows && col < self.cols {
@@ -165,7 +182,13 @@ mod tests {
     fn test_matrix_invalid_data_length() {
         let data = vec![1, 2, 3];
         let err = CostMatrix::new(2, 2, data).unwrap_err();
-        assert_eq!(err, AssignmentError::InvalidDataLength { expected: 4, found: 3 });
+        assert_eq!(
+            err,
+            AssignmentError::InvalidDataLength {
+                expected: 4,
+                found: 3
+            }
+        );
     }
 
     #[test]
