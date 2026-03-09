@@ -5,7 +5,7 @@ edition = "2024"
 authors = ["Sheyme <yourcursesheyme@gmail.com>"]
 description = "A casual Hungarian algorithm solver with LAPJV heuristics."
 repository = "https://github.com/YourCurseSheyme/Hungarian-algorithm-rs"
-license = "MIT"
+license = "MIT OR Apache-2.0"
 keywords = ["hungaria", "assignment", "bitpartite", "matching", "optimization"]
 categories = ["algorithms", "mathematics"]
 

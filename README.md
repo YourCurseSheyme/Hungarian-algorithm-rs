@@ -18,21 +18,24 @@ This crate provides a mathematically rigorous, domain-agnostic solver for bipart
 
 Add the following to your `Cargo.toml`:
 
+```toml
 [dependencies]
 assignment_solver = { path = "../assignment_solver" }
+```
 
 ## Quick Start
 
 use assignment_solver::{CostMatrix, Objective, solve_assignment};
 
+```rust
 fn main() {
-// 1. Define a cost matrix (e.g., 3 workers, 3 tasks)
-let data = vec![
-8, 4, 7,
-5, 2, 3,
-9, 4, 8
-];
-let matrix = CostMatrix::new(3, 3, data).unwrap();
+    // 1. Define a cost matrix (e.g., 3 workers, 3 tasks)
+    let data = vec![
+    8, 4, 7,
+    5, 2, 3,
+    9, 4, 8
+    ];
+    let matrix = CostMatrix::new(3, 3, data).unwrap();
 
     // 2. Solve for minimization
     let assignment = solve_assignment(&matrix, Objective::Minimize).unwrap();
@@ -43,6 +46,7 @@ let matrix = CostMatrix::new(3, 3, data).unwrap();
         println!("Worker {} assigned to Task {}", worker, task);
     }
 }
+```
 
 ## Architecture
 
