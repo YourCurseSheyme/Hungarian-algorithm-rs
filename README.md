@@ -1,4 +1,4 @@
-# Assignment Solver
+# Hungarian-algorithm-rs
 
 A high-performance, zero-allocation Rust library for solving the Linear Assignment Problem using the **Hungarian Algorithm (Kuhn-Munkres)**, enhanced with **LAPJV heuristics**.
 
@@ -20,14 +20,14 @@ Add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-assignment_solver = { path = "../assignment_solver" }
+assignment_solver = { path = "../Hungarian-algorithm-rs" }
 ```
 
 ## Quick Start
 
+```rust
 use assignment_solver::{CostMatrix, Objective, solve_assignment};
 
-```rust
 fn main() {
     // 1. Define a cost matrix (e.g., 3 workers, 3 tasks)
     let data = vec![
